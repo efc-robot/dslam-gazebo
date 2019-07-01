@@ -1,0 +1,33 @@
+<?xml version="1.0"?>
+<launch>
+  <!-- 空文件，里面什么也没有 -->
+  <arg name="config_extras"
+       default="$(eval optenv('GRIZZLY_CONFIG_EXTRAS', find('door_control') + '/config/empty.yaml'))"/>
+
+  <!-- Load controller configuration 加载控制配置文件 -->
+  <rosparam command="load" file="$(find door_control)/config/control1.yaml" />
+
+  <!-- Spawn controllers 控制器 -->
+  <node name="base_controller_spawner" pkg="controller_manager" type="spawner"
+        args="/door1/door_joint_publisher /door1/door_velocity_controller "/>
+
+  <!-- Start EKF for localization 定位反馈模块，返回odom  -->
+  <node pkg="robot_localization" type="ekf_localization_node" name="ekf_localization">
+    <rosparam command="load" file="$(find door_control)/config/localization1.yaml" />
+  </node>
+ 
+  <!-- 交互模块 marker -->
+  <node pkg="interactive_marker_twist_server" type="marker_server" name="twist_marker_server" output="screen">
+    <param name="marker_size_scale" value="2.0" />
+    <param name="link_name" value="/door1_link" />
+  </node>
+
+  <!-- 机器人速度控制 设置了优先级和从哪个topic来，最后看起来是都到了统一的话题 -->
+  <node pkg="twist_mux" type="twist_mux" name="twist_mux">
+    <rosparam command="load" file="$(find door_control)/config/twist_mux1.yaml" />
+    <remap from="cmd_vel_out" to="/door1/door_velocity_controller/cmd_vel"/>
+  </node>
+
+  <!-- Override the default control parameters, see config/empty.yaml for default. -->
+  <rosparam command="load" file="$(arg config_extras)" />
+</launch>

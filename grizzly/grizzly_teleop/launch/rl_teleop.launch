@@ -1,0 +1,20 @@
+<launch>
+  <!-- turtlebot_teleop_key already has its own built in velocity smoother -->
+  <node pkg="grizzly_teleop" type="turtlebot_teleop_key" name="turtlebot_teleop_keyboard"  output="screen">
+    <param name="scale_linear" value="0.5" type="double"/>
+    <param name="scale_angular" value="1.5" type="double"/>
+    <remap from="/cmd_vel" to="/car/rc_teleop/cmd_vel"/>
+  </node>
+  <node pkg="grizzly_teleop" type="door_control_key" name="door1_control_keyboard"  output="screen">
+    <remap from="/door/rc_teleop/cmd_vel" to="/door1/rc_teleop/cmd_vel"/>
+  </node>
+  <node pkg="grizzly_teleop" type="door_control_key" name="door2_control_keyboard"  output="screen">
+    <remap from="/door/rc_teleop/cmd_vel" to="/door2/rc_teleop/cmd_vel"/>
+  </node>
+  <node pkg="grizzly_teleop" type="door_control_key" name="door3_control_keyboard"  output="screen">
+    <remap from="/door/rc_teleop/cmd_vel" to="/door3/rc_teleop/cmd_vel"/>
+  </node>
+  <node pkg="grizzly_teleop" type="door_control_key" name="door4_control_keyboard"  output="screen">
+    <remap from="/door/rc_teleop/cmd_vel" to="/door4/rc_teleop/cmd_vel"/>
+  </node>
+</launch>

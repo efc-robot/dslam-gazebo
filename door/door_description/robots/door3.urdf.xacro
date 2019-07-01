@@ -1,0 +1,168 @@
+<?xml version="1.0"?>
+
+<robot  name="door" xmlns:xacro="http://www.ros.org/wiki/xacro">
+
+  <xacro:arg name="door3_namespace" default="/door3" />
+
+  <xacro:property name="M_PI" value="3.14159"/>
+
+  <!-- Wheel Properties -->
+  <xacro:property name="wheel_width" value="0.4" />
+  <xacro:property name="wheel_radius" value="0.3175" />
+  <xacro:property name="wheel_mass" value="15" />
+
+  <xacro:property name="wheel_x" value="1.25" />
+  <xacro:property name="wheel_y" value="0.4" />
+  <xacro:property name="wheel_z" value="0.03282" />
+
+  <xacro:property name="ground_clearance" value="0.03282" />
+
+  <link
+    name="door3_link">
+    <inertial>
+      <origin
+        xyz="3.3277E-16 -8.568E-17 2.137"
+        rpy="0 0 0" />
+      <mass
+        value="2300" />
+      <inertia
+        ixx="2942.44202898551"
+        ixy="-2.51419255784905E-14"
+        ixz="-4.52751463534133E-13"
+        iyy="5911.19202898551"
+        iyz="-2.33810555457744E-14"
+        izz="3064.58333333333" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 ${ground_clearance}"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://door_description/meshes/door.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 ${ground_clearance}"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://door_description/meshes/door.STL" />
+      </geometry>
+    </collision>
+  </link>
+
+  <xacro:macro name="door_wheel" params="wheel_prefix parent *joint_pose flipY">
+    <link name="${wheel_prefix}_wheel_link">
+      <inertial>
+        <mass value="${wheel_mass}" />
+        <origin xyz="-0.002 -0.198 0.003" />
+        <inertia  ixx="14.68" ixy="-0.033" ixz="0.07" iyy="26.7" iyz="-0.05" izz="14.68" />
+      </inertial>
+      <visual>
+        <origin xyz="0 0 0" rpy="${M_PI/2} ${flipY*M_PI} 0" />
+        <geometry>
+          <cylinder length="${wheel_width}" radius="${wheel_radius}" />
+        </geometry>
+        <material name="DarkGrey" />
+      </visual>
+      <collision>
+        <origin xyz="0 0 0" rpy="${M_PI/2} ${flipY*M_PI} 0" />
+        <geometry>
+          <cylinder length="${wheel_width}" radius="${wheel_radius}" />
+        </geometry>
+      </collision>
+    </link>
+
+    <joint name="${wheel_prefix}_wheel" type="continuous">
+      <parent link="${parent}"/>
+      <child link="${wheel_prefix}_wheel_link"/>
+      <xacro:insert_block name="joint_pose"/>
+      <axis xyz="0 1 0" rpy="0 0 0" />
+      <joint_properties damping="0.0" friction="0.0" />
+    </joint>
+
+    <transmission name="${wheel_prefix}_wheel_trans" type="SimpleTransmission">
+      <type>transmission_interface/SimpleTransmission</type>
+      <actuator name="${wheel_prefix}_wheel_motor">
+        <mechanicalReduction>1</mechanicalReduction>
+      </actuator>
+      <joint name="${wheel_prefix}_wheel">
+        <hardwareInterface>hardware_interface/VelocityJointInterface</hardwareInterface>
+      </joint>
+    </transmission>
+  </xacro:macro>
+
+  <!-- door wheel macros -->
+  <xacro:door_wheel wheel_prefix="door3_front_left" parent="door3_link" flipY="0">
+    <origin xyz="${wheel_x} ${wheel_y} ${wheel_z}" rpy="0 0 0" />
+  </xacro:door_wheel>
+  <xacro:door_wheel wheel_prefix="door3_front_right" parent="door3_link" flipY="1">
+    <origin xyz="${wheel_x} ${-wheel_y} ${wheel_z}" rpy="0 0 0" />
+  </xacro:door_wheel>
+  <xacro:door_wheel wheel_prefix="door3_rear_left" parent="door3_link" flipY="0">
+    <origin xyz="${-wheel_x} ${wheel_y} ${wheel_z}" rpy="0 0 0" />
+  </xacro:door_wheel>
+  <xacro:door_wheel wheel_prefix="door3_rear_right" parent="door3_link" flipY="1">
+    <origin xyz="${-wheel_x} ${-wheel_y} ${wheel_z}" rpy="0 0 0" />
+  </xacro:door_wheel>
+
+  <gazebo>
+    <plugin name="gazebo_ros_control" filename="libgazebo_ros_control.so">
+      <robotNamespace>$(arg door3_namespace)</robotNamespace>
+    </plugin>
+  </gazebo>
+
+  <gazebo reference="door3_front_left_wheel_link">
+    <mu1 value="1.0"/>
+    <mu2 value="1.0"/>
+    <kp value="10000000.0" />
+    <kd value="1.0" />
+    <fdir1 value="1 0 0"/>
+    <material>Gazebo/Grey</material>
+          <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="door3_front_right_wheel_link">
+    <mu1 value="1.0"/>
+    <mu2 value="1.0"/>
+    <kp value="10000000.0" />
+    <kd value="1.0" />
+    <fdir1 value="1 0 0"/>
+    <material>Gazebo/Grey</material>
+          <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="door3_rear_left_wheel_link">
+    <mu1 value="1.0"/>
+    <mu2 value="1.0"/>
+    <kp value="10000000.0" />
+    <kd value="1.0" />
+    <fdir1 value="1 0 0"/>
+    <material>Gazebo/Grey</material>
+          <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="door3_rear_right_wheel_link">
+    <mu1 value="1.0"/>
+    <mu2 value="1.0"/>
+    <kp value="10000000.0" />
+    <kd value="1.0" />
+    <fdir1 value="1 0 0"/>
+    <material>Gazebo/Grey</material>
+          <selfCollide>true</selfCollide>
+  </gazebo>
+
+  <gazebo reference="door3_link">
+    <material>Gazebo/Red</material>
+    <turnGravityOff>false</turnGravityOff>
+  </gazebo>
+
+
+</robot>
